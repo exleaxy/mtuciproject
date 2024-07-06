@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vacancies</title>
+</head>
+<body>
+    <h1>Vacancies</h1>
+    <ul id="vacancies-list"></ul>
+    <script>
+        async function fetchVacancies() {
+            try {
+                const response = await fetch("http://localhost:8000/vacancies/");
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                const data = await response.json();
+                const vacanciesList = document.getElementById("vacancies-list");
+                vacanciesList.innerHTML = "";
+                data.vacancies.forEach(function(vacancy) {
+                    var listItem = document.createElement("li");
+                    var title = vacancy.title || "No title";
+                    var company = vacancy.company || "No company";
+                    listItem.textContent = title + " at " + company;
+                    vacanciesList.appendChild(listItem);
+                });
+            } catch (error) {
+                console.error("Fetch error:", error);
+            }
+        }
+        fetchVacancies();
+    </script>
+</body>
+</html>

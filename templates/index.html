@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поиск Вакансий</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 800px;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group select {
+            width: calc(100% - 10px);
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .form-group button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .form-group button:hover {
+            background-color: #45a049;
+        }
+        .table-container {
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+        .vacancy-item {
+            margin-top: 15px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Поиск Вакансий</h1>
+        <form id="searchForm">
+            <div class="form-group">
+                <label for="jobTitle">Название должности:</label>
+                <input type="text" id="jobTitle" name="jobTitle">
+            </div>
+            <div class="form-group">
+                <label for="employmentType">Формат работы:</label>
+                <select id="employmentType" name="employmentType">
+                    <option value="doesnt-matter">Не имеет значения</option>
+                    <option value="full-time">Полная занятость</option>
+                    <option value="part-time">Частичная занятость</option>
+                    <option value="internship">Стажировка</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="region">Регион работы (введите число):</label>
+                <input type="number" id="region" name="region">
+            </div>
+            <div class="form-group">
+                <label for="salary">Желаемая зарплата:</label>
+                <input type="text" id="salary" name="salary">
+            </div>
+            <div class="form-group">
+                <label for="vacancyCount">Количество вакансий (по умолчанию 10):</label>
+                <input type="number" id="vacancyCount" name="vacancyCount" value="10">
+            </div>
+            <div class="form-group">
+                <button type="submit">Поиск</button>
+            </div>
+        </form>
+
+        <div id="vacancies" class="vacancies">
+            <!-- Результаты поиска вакансий будут отображены здесь -->
+        </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('searchForm');
+
+            form.addEventListener('submit', async function (event) {
+                event.preventDefault();
+                const jobTitle = document.getElementById('jobTitle').value;
+                const employmentType = document.getElementById('employmentType').value;
+                const region = document.getElementById('region').value;
+                const salary = document.getElementById('salary').value;
+                const vacancyCount = document.getElementById('vacancyCount').value;
+
+                const url = '/fetch_vacancies/?jobTitle=' + encodeURIComponent(jobTitle) +
+                            '&employmentType=' + encodeURIComponent(employmentType) +
+                            '&region=' + encodeURIComponent(region) +
+                            '&salary=' + encodeURIComponent(salary) +
+                            '&vacancyCount=' + encodeURIComponent(vacancyCount);
+
+                try {
+                    const response = await fetch(url, { method: 'POST' });
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+
+                    const vacancies = await response.json();
+                    renderVacancies(vacancies);
+                } catch (error) {
+                    console.error('Fetch error:', error);
+                }
+            });
+
+            function renderVacancies(vacancies) {
+                const vacanciesContainer = document.getElementById('vacancies');
+                vacanciesContainer.innerHTML = '';
+
+                vacancies.forEach(vacancy => {
+                    const vacancyItem = document.createElement('div');
+                    vacancyItem.classList.add('vacancy-item');
+                    vacancyItem.innerHTML = '<h3>' + vacancy.title + ' at ' + vacancy.company + '</h3>' +
+                                            '<p>Зарплата: ' + vacancy.salary + '</p>' +
+                                            '<p>Регион: ' + vacancy.region + '</p>' +
+                                            '<p>Формат работы: ' + vacancy.employmentType + '</p>';
+                    vacanciesContainer.appendChild(vacancyItem);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
